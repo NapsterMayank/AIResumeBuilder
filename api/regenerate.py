@@ -14,6 +14,8 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
+            print("API function called - POST request received")
+            
             # Enable CORS
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -24,24 +26,32 @@ class handler(BaseHTTPRequestHandler):
 
             # Get request data
             content_length = int(self.headers.get('Content-Length', 0))
+            print(f"Content-Length: {content_length}")
+            
             if content_length == 0:
+                print("No data received")
                 self.wfile.write(json.dumps({'error': 'No data received'}).encode('utf-8'))
                 return
                 
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
+            print(f"Received data: {data}")
 
             # Basic validation
             if not data or 'inputType' not in data or 'text' not in data:
+                print("Missing required fields")
                 self.wfile.write(json.dumps({'error': 'Missing required fields: inputType and text.'}).encode('utf-8'))
                 return
 
             # Get environment variables
             GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
             if not GEMINI_API_KEY:
+                print("Missing API key")
                 self.wfile.write(json.dumps({'error': 'Server configuration error: Missing API key.'}).encode('utf-8'))
                 return
 
+            print("API key found, proceeding with generation")
+            
             input_type = data.get('inputType')
             text = data.get('text')
             keywords = data.get('keywords', [])
@@ -49,6 +59,7 @@ class handler(BaseHTTPRequestHandler):
 
             # Construct prompt
             prompt = construct_prompt(input_type, text, keywords, experience_level)
+            print(f"Generated prompt for {input_type}")
 
             # Call Gemini API
             API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -56,18 +67,23 @@ class handler(BaseHTTPRequestHandler):
                 "contents": [{"parts": [{"text": prompt}]}]
             }
 
+            print("Calling Gemini API...")
             response = requests.post(API_URL, json=payload)
             response.raise_for_status()
+            print("Gemini API call successful")
 
             api_data = response.json()
             rewritten_text = api_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text')
 
             if rewritten_text:
+                print("Successfully generated text, returning response")
                 self.wfile.write(json.dumps({'rewrittenText': rewritten_text.strip()}).encode('utf-8'))
             else:
+                print("Failed to extract text from API response")
                 self.wfile.write(json.dumps({'error': 'Failed to extract text from AI response.'}).encode('utf-8'))
 
         except requests.exceptions.RequestException as e:
+            print(f"API request error: {str(e)}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -75,19 +91,13 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({'error': f'API request failed: {str(e)}'}).encode('utf-8'))
             
         except Exception as e:
+            print(f"General error: {str(e)}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(json.dumps({'error': f'Server error: {str(e)}'}).encode('utf-8'))
 
-    def do_OPTIONS(self):
-        # Handle CORS preflight requests
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
 
 def construct_prompt(input_type, text, keywords=None, experience_level=None):
     """Constructs a specific prompt for the LLM based on the regeneration type."""
