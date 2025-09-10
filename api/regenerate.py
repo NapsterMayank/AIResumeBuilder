@@ -1,102 +1,151 @@
 import os
 import json
 import requests
-from http.server import BaseHTTPRequestHandler
 
-class handler(BaseHTTPRequestHandler):
-    def do_OPTIONS(self):
-        # Handle CORS preflight requests
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
-
-    def do_POST(self):
+def handler(request):
+    """Main handler function for Vercel serverless function"""
+    
+    # Handle CORS preflight requests
+    if request.method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+            'body': ''
+        }
+    
+    if request.method != 'POST':
+        return {
+            'statusCode': 405,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            'body': json.dumps({'error': 'Method not allowed'})
+        }
+    
+    try:
+        print("API function called - POST request received")
+        
+        # Parse request body
         try:
-            print("API function called - POST request received")
+            if hasattr(request, 'get_json'):
+                data = request.get_json()
+            elif hasattr(request, 'json'):
+                data = request.json
+            else:
+                body = getattr(request, 'data', getattr(request, 'body', '{}'))
+                if isinstance(body, bytes):
+                    body = body.decode('utf-8')
+                data = json.loads(body) if body else {}
+        except Exception as parse_error:
+            print(f"Failed to parse request data: {parse_error}")
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                'body': json.dumps({'error': 'Invalid JSON in request body'})
+            }
             
-            # Enable CORS
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-            self.end_headers()
+        print(f"Received data: {data}")
 
-            # Get request data
-            content_length = int(self.headers.get('Content-Length', 0))
-            print(f"Content-Length: {content_length}")
-            
-            if content_length == 0:
-                print("No data received")
-                self.wfile.write(json.dumps({'error': 'No data received'}).encode('utf-8'))
-                return
-                
-            post_data = self.rfile.read(content_length)
-            data = json.loads(post_data.decode('utf-8'))
-            print(f"Received data: {data}")
-
-            # Basic validation
-            if not data or 'inputType' not in data or 'text' not in data:
-                print("Missing required fields")
-                self.wfile.write(json.dumps({'error': 'Missing required fields: inputType and text.'}).encode('utf-8'))
-                return
-
-            # Get environment variables
-            GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-            if not GEMINI_API_KEY:
-                print("Missing API key")
-                self.wfile.write(json.dumps({'error': 'Server configuration error: Missing API key.'}).encode('utf-8'))
-                return
-
-            print("API key found, proceeding with generation")
-            
-            input_type = data.get('inputType')
-            text = data.get('text')
-            keywords = data.get('keywords', [])
-            experience_level = data.get('experienceLevel')
-
-            # Construct prompt
-            prompt = construct_prompt(input_type, text, keywords, experience_level)
-            print(f"Generated prompt for {input_type}")
-
-            # Call Gemini API
-            API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-            payload = {
-                "contents": [{"parts": [{"text": prompt}]}]
+        # Basic validation
+        if not data or 'inputType' not in data or 'text' not in data:
+            print("Missing required fields")
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                'body': json.dumps({'error': 'Missing required fields: inputType and text.'})
             }
 
-            print("Calling Gemini API...")
-            response = requests.post(API_URL, json=payload)
-            response.raise_for_status()
-            print("Gemini API call successful")
+        # Get environment variables
+        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+        if not GEMINI_API_KEY:
+            print("Missing API key")
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                'body': json.dumps({'error': 'Server configuration error: Missing API key.'})
+            }
 
-            api_data = response.json()
-            rewritten_text = api_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text')
+        print("API key found, proceeding with generation")
+        
+        input_type = data.get('inputType')
+        text = data.get('text')
+        keywords = data.get('keywords', [])
+        experience_level = data.get('experienceLevel')
 
-            if rewritten_text:
-                print("Successfully generated text, returning response")
-                self.wfile.write(json.dumps({'rewrittenText': rewritten_text.strip()}).encode('utf-8'))
-            else:
-                print("Failed to extract text from API response")
-                self.wfile.write(json.dumps({'error': 'Failed to extract text from AI response.'}).encode('utf-8'))
+        # Construct prompt
+        prompt = construct_prompt(input_type, text, keywords, experience_level)
+        print(f"Generated prompt for {input_type}")
 
-        except requests.exceptions.RequestException as e:
-            print(f"API request error: {str(e)}")
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps({'error': f'API request failed: {str(e)}'}).encode('utf-8'))
-            
-        except Exception as e:
-            print(f"General error: {str(e)}")
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps({'error': f'Server error: {str(e)}'}).encode('utf-8'))
+        # Call Gemini API
+        API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}]
+        }
+
+        print("Calling Gemini API...")
+        api_response = requests.post(API_URL, json=payload)
+        api_response.raise_for_status()
+        print("Gemini API call successful")
+
+        api_data = api_response.json()
+        rewritten_text = api_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text')
+
+        if rewritten_text:
+            print("Successfully generated text, returning response")
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                'body': json.dumps({'rewrittenText': rewritten_text.strip()})
+            }
+        else:
+            print("Failed to extract text from API response")
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                'body': json.dumps({'error': 'Failed to extract text from AI response.'})
+            }
+
+    except requests.exceptions.RequestException as e:
+        print(f"API request error: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            'body': json.dumps({'error': f'API request failed: {str(e)}'})
+        }
+        
+    except Exception as e:
+        print(f"General error: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            'body': json.dumps({'error': f'Server error: {str(e)}'})
+        }
 
 
 def construct_prompt(input_type, text, keywords=None, experience_level=None):
