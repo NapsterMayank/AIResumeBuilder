@@ -4,46 +4,58 @@ import requests
 from http.server import BaseHTTPRequestHandler
 
 class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        # Enable CORS
+    def do_OPTIONS(self):
+        # Handle CORS preflight requests
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
 
-        # Get request data
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        data = json.loads(post_data.decode('utf-8'))
-
-        # Basic validation
-        if not data or 'inputType' not in data or 'text' not in data:
-            self.wfile.write(json.dumps({'error': 'Missing required fields: inputType and text.'}).encode('utf-8'))
-            return
-
-        # Get environment variables
-        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-        if not GEMINI_API_KEY:
-            self.wfile.write(json.dumps({'error': 'Server configuration error: Missing API key.'}).encode('utf-8'))
-            return
-
-        input_type = data.get('inputType')
-        text = data.get('text')
-        keywords = data.get('keywords', [])
-        experience_level = data.get('experienceLevel')
-
-        # Construct prompt
-        prompt = construct_prompt(input_type, text, keywords, experience_level)
-
-        # Call Gemini API
-        API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}]
-        }
-
+    def do_POST(self):
         try:
+            # Enable CORS
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+
+            # Get request data
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length == 0:
+                self.wfile.write(json.dumps({'error': 'No data received'}).encode('utf-8'))
+                return
+                
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+
+            # Basic validation
+            if not data or 'inputType' not in data or 'text' not in data:
+                self.wfile.write(json.dumps({'error': 'Missing required fields: inputType and text.'}).encode('utf-8'))
+                return
+
+            # Get environment variables
+            GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+            if not GEMINI_API_KEY:
+                self.wfile.write(json.dumps({'error': 'Server configuration error: Missing API key.'}).encode('utf-8'))
+                return
+
+            input_type = data.get('inputType')
+            text = data.get('text')
+            keywords = data.get('keywords', [])
+            experience_level = data.get('experienceLevel')
+
+            # Construct prompt
+            prompt = construct_prompt(input_type, text, keywords, experience_level)
+
+            # Call Gemini API
+            API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}]
+            }
+
             response = requests.post(API_URL, json=payload)
             response.raise_for_status()
 
@@ -56,7 +68,18 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({'error': 'Failed to extract text from AI response.'}).encode('utf-8'))
 
         except requests.exceptions.RequestException as e:
-            self.wfile.write(json.dumps({'error': 'An error occurred while regenerating the content.'}).encode('utf-8'))
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': f'API request failed: {str(e)}'}).encode('utf-8'))
+            
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': f'Server error: {str(e)}'}).encode('utf-8'))
 
     def do_OPTIONS(self):
         # Handle CORS preflight requests
