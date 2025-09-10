@@ -9,6 +9,7 @@ import {
   Check,
 } from "lucide-react";
 import { Experience } from "../types/resume";
+import { API_ENDPOINTS } from '../utils/api';
 
 interface ExperienceStepProps {
   data: Experience[];
@@ -141,7 +142,7 @@ export default function ExperienceStep({
       console.log("Context Text:", contextText);
 
       // Call your backend API
-      const response = await fetch("http://127.0.0.1:5000/api/regenerate", {
+      const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -341,7 +342,7 @@ export default function ExperienceStep({
       console.log("Sending data to API:", requestData);
 
       // Call your backend API
-      const response = await fetch("http://127.0.0.1:5000/api/regenerate", {
+      const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

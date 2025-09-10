@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, Trash2, Code, Wand2, RefreshCw, Search } from "lucide-react";
 import { Project } from "../types/resume";
+import { API_ENDPOINTS } from '../utils/api';
 
 interface ProjectsStepProps {
   data: Project[];
@@ -560,7 +561,7 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
       console.log("Sending data to API:", requestData);
 
       // Call your backend API
-      const response = await fetch("http://127.0.0.1:5000/api/regenerate", {
+      const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -651,7 +652,7 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
       console.log("Sending data to API:", requestData);
 
       // Call your backend API
-      const response = await fetch("http://127.0.0.1:5000/api/regenerate", {
+      const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -748,7 +749,7 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
       console.log("Original text:", originalText);
 
       // Call backend API
-      const response = await fetch("http://127.0.0.1:5000/api/regenerate", {
+      const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

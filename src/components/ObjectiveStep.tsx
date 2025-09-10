@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Lightbulb, Wand2, RefreshCw, Copy, Check, Plus } from "lucide-react";
+import { API_ENDPOINTS } from '../utils/api';
 
 interface ObjectiveStepProps {
   data: string;
@@ -322,10 +323,10 @@ export default function ObjectiveStep({ data, onUpdate }: ObjectiveStepProps) {
       console.log("All Keywords:", allSkills);
       console.log("Experience Level:", experienceLevel);
       console.log("Text to rewrite:", data);
-      console.log("Request URL:", "http://127.0.0.1:5000/api/regenerate");
+      console.log("Request URL:", API_ENDPOINTS.REGENERATE);
 
       // Call your backend API
-      const response = await fetch("http://127.0.0.1:5000/api/regenerate", {
+      const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
