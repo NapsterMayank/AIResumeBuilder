@@ -40,6 +40,17 @@ class handler(BaseHTTPRequestHandler):
                 self._set_cors_headers(500)
                 self.wfile.write(json.dumps({'error': 'Server configuration error: Missing API key.'}).encode('utf-8'))
                 return
+            
+            # Special debug endpoint
+            if data.get('inputType') == 'debug':
+                self._set_cors_headers(200)
+                debug_info = {
+                    'status': 'API is working',
+                    'hasApiKey': bool(GEMINI_API_KEY),
+                    'keyPrefix': GEMINI_API_KEY[:10] + '...' if GEMINI_API_KEY else 'None'
+                }
+                self.wfile.write(json.dumps(debug_info).encode('utf-8'))
+                return
 
             # Construct prompt and call Gemini API
             prompt = construct_prompt(
@@ -49,11 +60,34 @@ class handler(BaseHTTPRequestHandler):
                 data.get('experienceLevel')
             )
             
-            API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-            payload = {"contents": [{"parts": [{"text": prompt}]}]}
-
-            api_response = requests.post(API_URL, json=payload)
-            api_response.raise_for_status() # Raises an exception for bad responses (4xx or 5xx)
+            # Try different model endpoints in order of preference
+            model_endpoints = [
+                "gemini-2.0-flash",
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-latest", 
+                "gemini-pro",
+                "gemini-1.0-pro"
+            ]
+            
+            api_response = None
+            last_error = None
+            
+            for model in model_endpoints:
+                try:
+                    API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
+                    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+                    
+                    api_response = requests.post(API_URL, json=payload)
+                    api_response.raise_for_status()
+                    break  # Success - exit the loop
+                    
+                except requests.exceptions.RequestException as e:
+                    last_error = e
+                    continue  # Try next model
+            
+            if api_response is None:
+                # All models failed
+                raise last_error or Exception("All model endpoints failed")
 
             api_data = api_response.json()
             rewritten_text = api_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text')
