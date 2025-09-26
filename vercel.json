@@ -28,6 +28,7 @@
       "runtime": "python3.9"
     }
   },
+  "framework": "vite",
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "outputDirectory": "dist"
