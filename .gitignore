@@ -1,0 +1,10 @@
+node_modules
+.cache
+.local
+.npm
+dist
+.DS_Store
+.vite/
+*.timestamp-*.mjs
+.config
+.wrangler
