@@ -1,24 +1,56 @@
 import os
-from http.server import HTTPServer
+import json
+from http.server import BaseHTTPRequestHandler
+import google.generativeai as genai
 
-from api.regenerate import handler
+# This is the Vercel Serverless Function
+class handler(BaseHTTPRequestHandler):
 
+    def do_POST(self):
+        # 1. Get the API key from Vercel's environment variables
+        api_key = os.environ.get('GEMINI_API_KEY')
 
-def main() -> None:
-    host = os.getenv("HOST", "127.0.0.1")
-    port = int(os.getenv("PORT", "5000"))
-    httpd = HTTPServer((host, port), handler)
-    print(f"[API] Serving regenerate endpoint at http://{host}:{port}/api/regenerate")
-    print("[API] Ensure GEMINI_API_KEY is set in your environment for AI features.")
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\n[API] Shutting down server...")
-    finally:
-        httpd.server_close()
+        if not api_key:
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "GEMINI_API_KEY not set"}).encode())
+            return
 
+        # 2. Configure the Gemini client
+        genai.configure(api_key=api_key)
 
-if __name__ == "__main__":
-    main()
+        try:
+            # 3. Read the incoming request data from the user
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            request_body = json.loads(post_data)
+            
+            # Assuming the frontend sends JSON like: {"prompt": "Hello"}
+            user_prompt = request_body.get('prompt')
 
+            if not user_prompt:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Prompt is missing from request body"}).encode())
+                return
 
+            # 4. Generate content using the Gemini model
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(user_prompt)
+
+            # 5. Send a successful JSON response back to the frontend
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"text": response.text}).encode())
+
+        except Exception as e:
+            # Send a detailed error response if something goes wrong
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode())
+            
+        return
