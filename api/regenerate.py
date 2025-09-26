@@ -4,193 +4,68 @@ import json
 import requests
 
 class handler(BaseHTTPRequestHandler):
-    def do_OPTIONS(self):
-        # Handle CORS preflight requests
-        self.send_response(200)
+    def _set_cors_headers(self, status_code=200):
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
 
+    def do_OPTIONS(self):
+        # Handle CORS preflight requests
+        self._set_cors_headers()
+
     def do_POST(self):
         try:
-            print("API function called - POST request received")
-            
-            # Enable CORS
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-            self.end_headers()
-
             # Get request data
             content_length = int(self.headers.get('Content-Length', 0))
-            print(f"Content-Length: {content_length}")
-            
             if content_length == 0:
-                print("No data received")
+                self._set_cors_headers(400)
                 self.wfile.write(json.dumps({'error': 'No data received'}).encode('utf-8'))
                 return
-                
+            
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
-            print(f"Received data: {data}")
-
-            # Basic validation
-            if not data or 'inputType' not in data or 'text' not in data:
-                print("Missing required fields")
-                self.wfile.write(json.dumps({'error': 'Missing required fields: inputType and text.'}).encode('utf-8'))
-                return
 
             # Get environment variables
             GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
             if not GEMINI_API_KEY:
-                print("Missing API key")
+                self._set_cors_headers(500)
                 self.wfile.write(json.dumps({'error': 'Server configuration error: Missing API key.'}).encode('utf-8'))
                 return
 
-            print("API key found, proceeding with generation")
+            # Construct prompt and call Gemini API
+            prompt = construct_prompt(
+                data.get('inputType'),
+                data.get('text'),
+                data.get('keywords', []),
+                data.get('experienceLevel')
+            )
             
-            input_type = data.get('inputType')
-            text = data.get('text')
-            keywords = data.get('keywords', [])
-            experience_level = data.get('experienceLevel')
-
-            # Construct prompt
-            prompt = construct_prompt(input_type, text, keywords, experience_level)
-            print(f"Generated prompt for {input_type}")
-
-            # Call Gemini API
             API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-            payload = {
-                "contents": [{"parts": [{"text": prompt}]}]
-            }
+            payload = {"contents": [{"parts": [{"text": prompt}]}]}
 
-            print("Calling Gemini API...")
             api_response = requests.post(API_URL, json=payload)
-            api_response.raise_for_status()
-            print("Gemini API call successful")
+            api_response.raise_for_status() # Raises an exception for bad responses (4xx or 5xx)
 
             api_data = api_response.json()
             rewritten_text = api_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text')
 
             if rewritten_text:
-                print("Successfully generated text, returning response")
+                # Send success response ONLY after everything has worked
+                self._set_cors_headers(200)
                 self.wfile.write(json.dumps({'rewrittenText': rewritten_text.strip()}).encode('utf-8'))
             else:
-                print("Failed to extract text from API response")
+                self._set_cors_headers(500)
                 self.wfile.write(json.dumps({'error': 'Failed to extract text from AI response.'}).encode('utf-8'))
 
-        except requests.exceptions.RequestException as e:
-            print(f"API request error: {str(e)}")
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps({'error': f'API request failed: {str(e)}'}).encode('utf-8'))
-            
         except Exception as e:
-            print(f"General error: {str(e)}")
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps({'error': f'Server error: {str(e)}'}).encode('utf-8'))
+            # Send a single error response
+            self._set_cors_headers(500)
+            self.wfile.write(json.dumps({'error': f'An internal server error occurred: {str(e)}'}).encode('utf-8'))
 
-
-def construct_prompt(input_type, text, keywords=None, experience_level=None):
-    """Constructs a specific prompt for the LLM based on the regeneration type."""
-    if keywords is None:
-        keywords = []
-
-    keyword_text = f"Incorporate these keywords seamlessly: {', '.join(keywords)}." if keywords else ""
-    experience_text = f"The candidate's experience level is {experience_level}." if experience_level else ""
-
-    prompts = {
-        'objective': f"""
-            Act as an expert career coach and resume writer. 
-            Rewrite the following professional objective to be concise, powerful, and ATS-friendly. 
-            The rewritten objective should be a single paragraph, no more than 3-4 sentences.
-            It must be tailored for a tech industry role.
-            {experience_text}
-            {keyword_text}
-
-            Original Objective: "{text}"
-            
-            Return only the rewritten objective text, without any introductory phrases.
-        """,
-        'experience': f"""
-            Act as an expert technical resume writer. 
-            
-            IMPORTANT FORMATTING REQUIREMENTS:
-            - Create exactly 3-5 concise bullet points
-            - Each bullet point must be 1-2 sentences maximum (under 150 characters)
-            - Start each bullet point with a strong action verb
-            - Use the STAR method (Situation, Task, Action, Result)
-            - Include quantified achievements with specific metrics when possible
-            - Format as bullet points using the • symbol
-            - Each bullet point should be on a separate line
-            
-            {experience_text}
-            {keyword_text}
-
-            Original Experience: "{text}"
-
-            Return ONLY the bullet points in this exact format:
-            • [First bullet point with action verb and quantified result]
-            • [Second bullet point with action verb and quantified result]
-            • [Third bullet point with action verb and quantified result]
-            
-            Do not include any introductory text or explanations.
-        """,
-        'project_description': f"""
-            Act as an expert technical resume writer and project portfolio specialist.
-            
-            Create a professional, concise project description (2-3 sentences maximum, under 200 characters total).
-            Focus on the technical implementation, problem solved, and impact.
-            
-            REQUIREMENTS:
-            - Start with what the project does/solves
-            - Mention key technologies used
-            - Include a quantifiable impact or technical achievement if possible
-            - Make it ATS-friendly and recruiter-readable
-            - Keep it concise and impactful
-            
-            {keyword_text}
-
-            Project Context: "{text}"
-            
-            Return only the project description, without any introductory phrases.
-        """,
-        'project_highlights': f"""
-            Act as an expert technical resume writer.
-            
-            Create exactly 3-4 professional project highlight bullet points based on the project context.
-            
-            FORMATTING REQUIREMENTS:
-            - Each bullet point must be 1-2 sentences maximum (under 130 characters)
-            - Start with strong action verbs (Built, Implemented, Developed, Architected, etc.)
-            - Include specific technical details and quantified results when possible
-            - Focus on technical challenges solved and achievements
-            - Format as bullet points using the • symbol
-            - Each bullet point should be on a separate line
-            
-            {keyword_text}
-
-            Project Context: "{text}"
-
-            Return ONLY the bullet points in this exact format:
-            • [First highlight with action verb and technical detail]
-            • [Second highlight with action verb and quantified result]
-            • [Third highlight with action verb and technical achievement]
-            
-            Do not include any introductory text or explanations.
-        """
-    }
-    return prompts.get(input_type, text)
-
-
+# --- CORRECTED: Only one definition of this function ---
 def construct_prompt(input_type, text, keywords=None, experience_level=None):
     """Constructs a specific prompt for the LLM based on the regeneration type."""
     if keywords is None:
