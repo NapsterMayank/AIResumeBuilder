@@ -1,21 +1,21 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { AdminAuthProvider } from './contexts/AdminAuthContext';
-import ScrollToTop from './components/ScrollToTop';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
+import ScrollToTop from '@/components/ScrollToTop';
 
 // Import Pages
-import LandingPage from './pages/LandingPage';
-import Dashboard from './pages/Dashboard';
-import ResumeTemplates from './pages/ResumeTemplates';
-import ResumeBuilder from './ResumeBuilderPage';
-import CoverLetterGenerator from './pages/CoverLetterGenerator';
-import MockInterview from './pages/MockInterview';
-import Profile from './pages/Profile';
-import Pricing from './pages/Pricing';
-import NotFound from './pages/NotFound';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
+import LandingPage from '@/pages/LandingPage';
+import Dashboard from '@/pages/Dashboard';
+import ResumeTemplates from '@/pages/ResumeTemplates';
+import ResumeBuilder from '@/pages/ResumeBuilder';
+import CoverLetterGenerator from '@/pages/CoverLetterGenerator';
+import MockInterview from '@/pages/MockInterview';
+import Profile from '@/pages/Profile';
+import Pricing from '@/pages/Pricing';
+import NotFound from '@/pages/NotFound';
+import AdminLogin from '@/pages/AdminLogin';
+import AdminDashboard from '@/pages/AdminDashboard';
+import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
 
 function App() {
   return (
