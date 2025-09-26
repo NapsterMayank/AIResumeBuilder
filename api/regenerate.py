@@ -28,6 +28,12 @@ class handler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
 
+            # Basic validation
+            if not data or 'inputType' not in data or 'text' not in data:
+                self._set_cors_headers(400)
+                self.wfile.write(json.dumps({'error': 'Missing required fields: inputType and text.'}).encode('utf-8'))
+                return
+
             # Get environment variables
             GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
             if not GEMINI_API_KEY:
@@ -43,7 +49,7 @@ class handler(BaseHTTPRequestHandler):
                 data.get('experienceLevel')
             )
             
-            API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={GEMINI_API_KEY}"
+            API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
             payload = {"contents": [{"parts": [{"text": prompt}]}]}
 
             api_response = requests.post(API_URL, json=payload)
@@ -60,10 +66,28 @@ class handler(BaseHTTPRequestHandler):
                 self._set_cors_headers(500)
                 self.wfile.write(json.dumps({'error': 'Failed to extract text from AI response.'}).encode('utf-8'))
 
-        except Exception as e:
-            # Send a single error response
+        except requests.exceptions.RequestException as e:
+            # Handle API-specific errors without exposing sensitive info
+            error_message = "Failed to connect to AI service. Please try again."
+            if hasattr(e, 'response') and e.response is not None:
+                if e.response.status_code == 400:
+                    error_message = "Invalid request to AI service."
+                elif e.response.status_code == 401:
+                    error_message = "Authentication failed with AI service."
+                elif e.response.status_code == 403:
+                    error_message = "Access denied to AI service."
+                elif e.response.status_code == 404:
+                    error_message = "AI service endpoint not found."
+                elif e.response.status_code >= 500:
+                    error_message = "AI service is temporarily unavailable."
+            
             self._set_cors_headers(500)
-            self.wfile.write(json.dumps({'error': f'An internal server error occurred: {str(e)}'}).encode('utf-8'))
+            self.wfile.write(json.dumps({'error': error_message}).encode('utf-8'))
+            
+        except Exception as e:
+            # Send a single error response without sensitive details
+            self._set_cors_headers(500)
+            self.wfile.write(json.dumps({'error': 'An internal server error occurred. Please try again.'}).encode('utf-8'))
 
 # --- CORRECTED: Only one definition of this function ---
 def construct_prompt(input_type, text, keywords=None, experience_level=None):
