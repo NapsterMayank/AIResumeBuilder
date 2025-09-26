@@ -43,7 +43,7 @@ class handler(BaseHTTPRequestHandler):
                 data.get('experienceLevel')
             )
             
-            API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+            API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={GEMINI_API_KEY}"
             payload = {"contents": [{"parts": [{"text": prompt}]}]}
 
             api_response = requests.post(API_URL, json=payload)
