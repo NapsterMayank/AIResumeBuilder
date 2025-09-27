@@ -134,13 +134,6 @@ export default function ExperienceStep({
         experienceLevel: "mid", // You can make this dynamic if needed
       };
 
-      console.log("=== EXPERIENCE API REQUEST DEBUG ===");
-      console.log("Sending data to API:", requestData);
-      console.log("Job Title:", experience.jobTitle);
-      console.log("Company:", experience.company);
-      console.log("All Keywords:", allSkills);
-      console.log("Context Text:", contextText);
-
       // Call your backend API
       const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
@@ -150,15 +143,11 @@ export default function ExperienceStep({
         body: JSON.stringify(requestData),
       });
 
-      console.log("=== EXPERIENCE API RESPONSE DEBUG ===");
-      console.log("API Response status:", response.status);
-
       if (!response.ok) {
         // Try to get error details from response
         let errorDetails;
         try {
           errorDetails = await response.text();
-          console.log("Error response body:", errorDetails);
         } catch {
           errorDetails = "Could not read error response";
         }
@@ -168,7 +157,6 @@ export default function ExperienceStep({
       }
 
       const result = await response.json();
-      console.log("API Response data:", result);
 
       // Your backend returns { rewrittenText: "..." }
       const rewrittenText = result.rewrittenText;
@@ -337,10 +325,6 @@ export default function ExperienceStep({
         experienceLevel: "mid",
       };
 
-      console.log("=== ENHANCE RESPONSIBILITY API REQUEST ===");
-      console.log("Original text:", originalText);
-      console.log("Sending data to API:", requestData);
-
       // Call your backend API
       const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
@@ -354,7 +338,6 @@ export default function ExperienceStep({
         let errorDetails;
         try {
           errorDetails = await response.text();
-          console.log("Error response body:", errorDetails);
         } catch {
           errorDetails = "Could not read error response";
         }
@@ -364,7 +347,6 @@ export default function ExperienceStep({
       }
 
       const result = await response.json();
-      console.log("Enhanced responsibility response:", result);
 
       const enhancedText = result.rewrittenText;
 

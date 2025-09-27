@@ -557,9 +557,6 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
         experienceLevel: "mid",
       };
 
-      console.log("=== PROJECT DESCRIPTION API REQUEST ===");
-      console.log("Sending data to API:", requestData);
-
       // Call your backend API
       const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
@@ -573,7 +570,6 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
         let errorDetails;
         try {
           errorDetails = await response.text();
-          console.log("Error response body:", errorDetails);
         } catch {
           errorDetails = "Could not read error response";
         }
@@ -583,7 +579,6 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
       }
 
       const result = await response.json();
-      console.log("Description API Response:", result);
 
       const description = result.rewrittenText;
 
@@ -648,9 +643,6 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
         experienceLevel: "mid",
       };
 
-      console.log("=== PROJECT HIGHLIGHTS API REQUEST ===");
-      console.log("Sending data to API:", requestData);
-
       // Call your backend API
       const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
@@ -673,7 +665,6 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
       }
 
       const result = await response.json();
-      console.log("Highlights API Response:", result);
 
       const highlightsText = result.rewrittenText;
 
@@ -744,9 +735,6 @@ export default function ProjectsStep({ data, onUpdate }: ProjectsStepProps) {
         keywords: allSkills,
         experienceLevel: "mid",
       };
-
-      console.log("=== ENHANCE PROJECT HIGHLIGHT API REQUEST ===");
-      console.log("Original text:", originalText);
 
       // Call backend API
       const response = await fetch(API_ENDPOINTS.REGENERATE, {

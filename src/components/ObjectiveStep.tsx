@@ -316,15 +316,6 @@ export default function ObjectiveStep({ data, onUpdate }: ObjectiveStepProps) {
         experienceLevel: experienceLevel,
       };
 
-      console.log("=== API REQUEST DEBUG ===");
-      console.log("Sending data to API:", requestData);
-      console.log("Technical Skills count:", technicalSkills.length);
-      console.log("Soft Skills count:", softSkills.length);
-      console.log("All Keywords:", allSkills);
-      console.log("Experience Level:", experienceLevel);
-      console.log("Text to rewrite:", data);
-      console.log("Request URL:", API_ENDPOINTS.REGENERATE);
-
       // Call your backend API
       const response = await fetch(API_ENDPOINTS.REGENERATE, {
         method: "POST",
@@ -334,19 +325,11 @@ export default function ObjectiveStep({ data, onUpdate }: ObjectiveStepProps) {
         body: JSON.stringify(requestData),
       });
 
-      console.log("=== API RESPONSE DEBUG ===");
-      console.log("API Response status:", response.status);
-      console.log(
-        "API Response headers:",
-        Object.fromEntries(response.headers.entries())
-      );
-
       if (!response.ok) {
         // Try to get error details from response
         let errorDetails;
         try {
           errorDetails = await response.text();
-          console.log("Error response body:", errorDetails);
         } catch {
           errorDetails = "Could not read error response";
         }
@@ -356,7 +339,6 @@ export default function ObjectiveStep({ data, onUpdate }: ObjectiveStepProps) {
       }
 
       const result = await response.json();
-      console.log("API Response data:", result); // Debug log
 
       // Your backend returns { rewrittenText: "..." }
       const rewrittenText = result.rewrittenText;
