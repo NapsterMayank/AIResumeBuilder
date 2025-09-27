@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Lightbulb, Wand2, RefreshCw, Copy, Check, Plus } from "lucide-react";
-import { API_ENDPOINTS } from '../utils/api';
+import { API_ENDPOINTS } from "../utils/api";
 
 interface ObjectiveStepProps {
   data: string;

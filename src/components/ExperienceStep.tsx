@@ -9,7 +9,7 @@ import {
   Check,
 } from "lucide-react";
 import { Experience } from "../types/resume";
-import { API_ENDPOINTS } from '../utils/api';
+import { API_ENDPOINTS } from "../utils/api";
 
 interface ExperienceStepProps {
   data: Experience[];

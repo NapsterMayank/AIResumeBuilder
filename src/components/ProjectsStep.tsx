@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, Trash2, Code, Wand2, RefreshCw, Search } from "lucide-react";
 import { Project } from "../types/resume";
-import { API_ENDPOINTS } from '../utils/api';
+import { API_ENDPOINTS } from "../utils/api";
 
 interface ProjectsStepProps {
   data: Project[];
