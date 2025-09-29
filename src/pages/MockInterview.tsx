@@ -20,7 +20,7 @@ import {
   Target
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { API_ENDPOINTS } from '@/pages/utils/api';
+import { API_ENDPOINTS } from '@/config/apiConfig';
 
 interface Question {
   id: string;

@@ -77,7 +77,7 @@ export const useErrorHandler = () => {
 };
 
 // Helper function to convert technical errors to user-friendly messages
-function getUserFriendlyMessage(message: string, code?: string): string {
+function getUserFriendlyMessage(message: string, _code?: string): string {
   const lowerMessage = message.toLowerCase();
 
   // Network errors

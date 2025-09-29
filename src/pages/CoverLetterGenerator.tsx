@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { API_ENDPOINTS } from '@/pages/utils/api';
+import { API_ENDPOINTS } from '@/config/apiConfig';
 
 const CoverLetterGenerator = () => {
   const navigate = useNavigate();

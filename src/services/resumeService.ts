@@ -14,11 +14,11 @@ class ResumeService extends BaseApiService {
         request
       );
 
-      if (!response.data?.rewritten_text) {
+      if (!response.data?.data?.rewritten_text) {
         throw new Error("No rewritten text received from API");
       }
 
-      return response.data.rewritten_text;
+      return response.data.data.rewritten_text;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";

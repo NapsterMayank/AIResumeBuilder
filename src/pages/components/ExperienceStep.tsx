@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, Trash2, Building, Wand2, RefreshCw, Copy, Check } from "lucide-react";
 import { Experience } from "../types/resume";
-import { API_ENDPOINTS } from '../utils/api';
+import { API_ENDPOINTS } from '@/config/apiConfig';
 
 interface ExperienceStepProps {
   data: Experience[];
