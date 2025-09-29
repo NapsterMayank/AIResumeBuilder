@@ -11,11 +11,11 @@ interface GeneratedObjectivesProps {
   isGenerating: boolean;
 }
 
-const GeneratedObjectives = ({ 
-  objectives, 
-  onSelect, 
-  onRegenerate, 
-  isGenerating 
+const GeneratedObjectives = ({
+  objectives,
+  onSelect,
+  onRegenerate,
+  isGenerating,
 }: GeneratedObjectivesProps) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -42,15 +42,17 @@ const GeneratedObjectives = ({
           disabled={isGenerating}
           className="flex items-center gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`}
+          />
           Regenerate
         </Button>
       </div>
 
       <div className="space-y-3">
         {objectives.map((objective, index) => (
-          <Card 
-            key={index} 
+          <Card
+            key={index}
             className="cursor-pointer transition-all hover:shadow-md hover:border-blue-300"
             onClick={() => onSelect(objective)}
           >

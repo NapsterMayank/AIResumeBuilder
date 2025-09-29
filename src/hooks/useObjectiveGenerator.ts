@@ -1,7 +1,7 @@
 // Custom hook for objective generation logic
-import { useState, useCallback } from 'react';
-import { resumeService } from '@/services';
-import { RegenerateRequest } from '@/models';
+import { useState, useCallback } from "react";
+import { resumeService } from "@/services";
+import { RegenerateRequest } from "@/models";
 
 interface UseObjectiveGeneratorProps {
   currentObjective: string;
@@ -14,7 +14,7 @@ export const useObjectiveGenerator = ({
   currentObjective,
   technicalSkills,
   softSkills,
-  experienceLevel
+  experienceLevel,
 }: UseObjectiveGeneratorProps) => {
   const [generatedObjectives, setGeneratedObjectives] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -29,24 +29,25 @@ export const useObjectiveGenerator = ({
 
     try {
       const allSkills = [...technicalSkills, ...softSkills];
-      
+
       const requestData: RegenerateRequest = {
         text: currentObjective || "Generate a professional objective for me",
-        type: 'objective',
+        type: "objective",
         context: {
           skills: allSkills,
-          jobTitle: experienceLevel
-        }
+          jobTitle: experienceLevel,
+        },
       };
 
       const rewrittenText = await resumeService.regenerateContent(requestData);
-      
+
       setGeneratedObjectives([rewrittenText]);
       setShowGeneratedOptions(true);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setError(errorMessage);
-      
+
       // Show error message to user
       const errorObjective = `API Error: ${errorMessage}. Please check your backend server and try again.`;
       setGeneratedObjectives([errorObjective]);
@@ -54,7 +55,13 @@ export const useObjectiveGenerator = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [currentObjective, technicalSkills, softSkills, experienceLevel, isGenerating]);
+  }, [
+    currentObjective,
+    technicalSkills,
+    softSkills,
+    experienceLevel,
+    isGenerating,
+  ]);
 
   const selectObjective = useCallback((objective: string) => {
     setShowGeneratedOptions(false);
@@ -79,6 +86,6 @@ export const useObjectiveGenerator = ({
     generateObjective,
     selectObjective,
     regenerateObjectives,
-    hideGeneratedOptions
+    hideGeneratedOptions,
   };
 };

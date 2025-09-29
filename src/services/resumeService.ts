@@ -1,7 +1,7 @@
 // Resume-related API service
-import BaseApiService from './baseApiService';
-import { RegenerateRequest, RegenerateResponse, ResumeData } from '@/models';
-import { API_ENDPOINTS } from '@/config/apiConfig';
+import BaseApiService from "./baseApiService";
+import { RegenerateRequest, RegenerateResponse, ResumeData } from "@/models";
+import { API_ENDPOINTS } from "@/config/apiConfig";
 
 class ResumeService extends BaseApiService {
   /**
@@ -20,7 +20,8 @@ class ResumeService extends BaseApiService {
 
       return response.data.rewritten_text;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       throw new Error(`Failed to regenerate content: ${errorMessage}`);
     }
   }
@@ -60,9 +61,7 @@ class ResumeService extends BaseApiService {
    * Delete resume by ID
    */
   async deleteResume(id: string): Promise<void> {
-    await this.delete(
-      `${API_ENDPOINTS.RESUME.DELETE}/${id}`
-    );
+    await this.delete(`${API_ENDPOINTS.RESUME.DELETE}/${id}`);
   }
 
   /**
@@ -76,8 +75,8 @@ class ResumeService extends BaseApiService {
     const response = await this.post<{ suggestions: string[] }>(
       `${API_ENDPOINTS.REGENERATE}/suggestions`,
       {
-        type: 'objective',
-        context
+        type: "objective",
+        context,
       }
     );
 

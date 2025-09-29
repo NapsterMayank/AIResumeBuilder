@@ -11,8 +11,8 @@ export interface User {
 }
 
 export interface UserSubscription {
-  plan: 'free' | 'basic' | 'premium';
-  status: 'active' | 'inactive' | 'cancelled';
+  plan: "free" | "basic" | "premium";
+  status: "active" | "inactive" | "cancelled";
   expiresAt?: string;
   features: string[];
 }
@@ -40,7 +40,7 @@ export interface AuthResponse {
 export interface AdminUser {
   id: string;
   username: string;
-  role: 'admin' | 'superadmin';
+  role: "admin" | "superadmin";
   permissions: string[];
   lastLogin?: string;
 }

@@ -1,7 +1,13 @@
 // Authentication API service
-import BaseApiService from './baseApiService';
-import { LoginRequest, RegisterRequest, AuthResponse, AdminLoginRequest, AdminUser } from '@/models';
-import { API_ENDPOINTS } from '@/config/apiConfig';
+import BaseApiService from "./baseApiService";
+import {
+  LoginRequest,
+  RegisterRequest,
+  AuthResponse,
+  AdminLoginRequest,
+  AdminUser,
+} from "@/models";
+import { API_ENDPOINTS } from "@/config/apiConfig";
 
 class AuthService extends BaseApiService {
   /**
@@ -47,7 +53,9 @@ class AuthService extends BaseApiService {
   /**
    * Admin login
    */
-  async adminLogin(credentials: AdminLoginRequest): Promise<{ admin: AdminUser; token: string }> {
+  async adminLogin(
+    credentials: AdminLoginRequest
+  ): Promise<{ admin: AdminUser; token: string }> {
     const response = await this.post<{ admin: AdminUser; token: string }>(
       API_ENDPOINTS.ADMIN.LOGIN,
       credentials
@@ -79,21 +87,21 @@ class AuthService extends BaseApiService {
    * Set authentication token in localStorage and default headers
    */
   private setAuthToken(token: string): void {
-    localStorage.setItem('authToken', token);
+    localStorage.setItem("authToken", token);
   }
 
   /**
    * Get authentication token from localStorage
    */
   getAuthToken(): string | null {
-    return localStorage.getItem('authToken');
+    return localStorage.getItem("authToken");
   }
 
   /**
    * Clear authentication token
    */
   private clearAuthToken(): void {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem("authToken");
   }
 
   /**
@@ -109,7 +117,7 @@ class AuthService extends BaseApiService {
    */
   private isTokenExpired(token: string): boolean {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(atob(token.split(".")[1]));
       return payload.exp * 1000 < Date.now();
     } catch {
       return true;

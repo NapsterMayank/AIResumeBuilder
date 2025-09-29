@@ -66,7 +66,7 @@ export interface ResumeData {
 // API-related interfaces
 export interface RegenerateRequest {
   text: string;
-  type: 'objective' | 'experience' | 'project' | 'education';
+  type: "objective" | "experience" | "project" | "education";
   context?: {
     skills?: string[];
     industry?: string;

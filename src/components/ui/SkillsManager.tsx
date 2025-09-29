@@ -12,17 +12,20 @@ interface SkillsManagerProps {
   onSoftSkillsChange: (skills: string[]) => void;
 }
 
-const SkillsManager = ({ 
-  technicalSkills, 
-  softSkills, 
-  onTechnicalSkillsChange, 
-  onSoftSkillsChange 
+const SkillsManager = ({
+  technicalSkills,
+  softSkills,
+  onTechnicalSkillsChange,
+  onSoftSkillsChange,
 }: SkillsManagerProps) => {
   const [newTechnicalSkill, setNewTechnicalSkill] = useState("");
   const [newSoftSkill, setNewSoftSkill] = useState("");
 
   const addTechnicalSkill = () => {
-    if (newTechnicalSkill.trim() && !technicalSkills.includes(newTechnicalSkill.trim())) {
+    if (
+      newTechnicalSkill.trim() &&
+      !technicalSkills.includes(newTechnicalSkill.trim())
+    ) {
       onTechnicalSkillsChange([...technicalSkills, newTechnicalSkill.trim()]);
       setNewTechnicalSkill("");
     }
@@ -36,22 +39,24 @@ const SkillsManager = ({
   };
 
   const removeTechnicalSkill = (skillToRemove: string) => {
-    onTechnicalSkillsChange(technicalSkills.filter(skill => skill !== skillToRemove));
+    onTechnicalSkillsChange(
+      technicalSkills.filter((skill) => skill !== skillToRemove)
+    );
   };
 
   const removeSoftSkill = (skillToRemove: string) => {
-    onSoftSkillsChange(softSkills.filter(skill => skill !== skillToRemove));
+    onSoftSkillsChange(softSkills.filter((skill) => skill !== skillToRemove));
   };
 
   const handleTechnicalKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addTechnicalSkill();
     }
   };
 
   const handleSoftKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addSoftSkill();
     }
@@ -64,7 +69,7 @@ const SkillsManager = ({
         <h4 className="text-sm font-medium text-gray-700">
           Technical Skills ({technicalSkills.length})
         </h4>
-        
+
         <div className="flex gap-2">
           <Input
             placeholder="Add technical skill (e.g., React, Python)"
@@ -73,7 +78,7 @@ const SkillsManager = ({
             onKeyPress={handleTechnicalKeyPress}
             className="flex-1"
           />
-          <Button 
+          <Button
             onClick={addTechnicalSkill}
             size="sm"
             disabled={!newTechnicalSkill.trim()}
@@ -85,8 +90,8 @@ const SkillsManager = ({
         {technicalSkills.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {technicalSkills.map((skill, index) => (
-              <Badge 
-                key={index} 
+              <Badge
+                key={index}
                 variant="secondary"
                 className="flex items-center gap-1 px-2 py-1"
               >
@@ -108,7 +113,7 @@ const SkillsManager = ({
         <h4 className="text-sm font-medium text-gray-700">
           Soft Skills ({softSkills.length})
         </h4>
-        
+
         <div className="flex gap-2">
           <Input
             placeholder="Add soft skill (e.g., Leadership, Communication)"
@@ -117,7 +122,7 @@ const SkillsManager = ({
             onKeyPress={handleSoftKeyPress}
             className="flex-1"
           />
-          <Button 
+          <Button
             onClick={addSoftSkill}
             size="sm"
             disabled={!newSoftSkill.trim()}
@@ -129,8 +134,8 @@ const SkillsManager = ({
         {softSkills.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {softSkills.map((skill, index) => (
-              <Badge 
-                key={index} 
+              <Badge
+                key={index}
                 variant="outline"
                 className="flex items-center gap-1 px-2 py-1"
               >

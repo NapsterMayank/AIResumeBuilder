@@ -1,22 +1,18 @@
 // Base API service with error handling and common functionality
-import { ApiResponse } from '@/models';
+import { ApiResponse } from "@/models";
 
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public code?: string
-  ) {
+  constructor(message: string, public status: number, public code?: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
 class BaseApiService {
   private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType?.includes('application/json');
-    
+    const contentType = response.headers.get("content-type");
+    const isJson = contentType?.includes("application/json");
+
     let data: any;
     try {
       data = isJson ? await response.json() : await response.text();
@@ -25,22 +21,28 @@ class BaseApiService {
     }
 
     if (!response.ok) {
-      const errorMessage = data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`;
+      const errorMessage =
+        data?.message ||
+        data?.error ||
+        `HTTP ${response.status}: ${response.statusText}`;
       throw new ApiError(errorMessage, response.status, data?.code);
     }
 
     return {
       success: true,
       data,
-      message: data?.message
+      message: data?.message,
     };
   }
 
-  protected async get<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  protected async get<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
     const response = await fetch(endpoint, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -50,14 +52,14 @@ class BaseApiService {
   }
 
   protected async post<T>(
-    endpoint: string, 
-    body?: any, 
+    endpoint: string,
+    body?: any,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const response = await fetch(endpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -68,14 +70,14 @@ class BaseApiService {
   }
 
   protected async put<T>(
-    endpoint: string, 
-    body?: any, 
+    endpoint: string,
+    body?: any,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const response = await fetch(endpoint, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -85,11 +87,14 @@ class BaseApiService {
     return this.handleResponse<T>(response);
   }
 
-  protected async delete<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  protected async delete<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
     const response = await fetch(endpoint, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,

@@ -9,15 +9,15 @@ interface KeywordsSuggestionProps {
   selectedKeywords: string[];
 }
 
-const KeywordsSuggestion = ({ 
-  suggestions, 
-  onAddKeyword, 
-  selectedKeywords 
+const KeywordsSuggestion = ({
+  suggestions,
+  onAddKeyword,
+  selectedKeywords,
 }: KeywordsSuggestionProps) => {
   const [showAllKeywords, setShowAllKeywords] = useState(false);
-  
-  const displayedKeywords = showAllKeywords 
-    ? suggestions 
+
+  const displayedKeywords = showAllKeywords
+    ? suggestions
     : suggestions.slice(0, 12);
 
   return (
@@ -55,7 +55,9 @@ const KeywordsSuggestion = ({
           className="text-blue-600 hover:text-blue-800"
           onClick={() => setShowAllKeywords(!showAllKeywords)}
         >
-          {showAllKeywords ? "Show Less" : `Show ${suggestions.length - 12} More`}
+          {showAllKeywords
+            ? "Show Less"
+            : `Show ${suggestions.length - 12} More`}
         </Button>
       )}
     </div>
