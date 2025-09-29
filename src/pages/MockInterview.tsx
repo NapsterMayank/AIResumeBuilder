@@ -236,7 +236,7 @@ const MockInterview = () => {
             "hard",
           ];
           setQuestions(
-            list.map((q, i) => ({
+            list.map((q: string, i: number) => ({
               id: String(i + 1),
               type: selectedType as "behavioral" | "technical" | "situational",
               company: selectedCompany,

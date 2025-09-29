@@ -97,9 +97,9 @@ const CoverLetterGenerator = () => {
         body: JSON.stringify({
           inputType: "cover_letter",
           text: context,
-          keywords: skills
+          keywords: jobDetails.jobDescription
             .split(",")
-            .map((s) => s.trim())
+            .map((s: string) => s.trim())
             .filter(Boolean),
           experienceLevel: tone,
         }),
