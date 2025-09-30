@@ -121,94 +121,126 @@
   }
 }
 
-/* Print-specific styles for professional resume format */
+/* ULTIMATE SINGLE PAGE PRINT STYLES */
 @media print {
+  /* Clean page setup */
   @page {
     size: A4;
-    margin: 0.5in 0.75in;
-    /* Hide browser headers and footers */
-    @top-left { content: ""; }
-    @top-center { content: ""; }
-    @top-right { content: ""; }
-    @bottom-left { content: ""; }
-    @bottom-center { content: ""; }
-    @bottom-right { content: ""; }
+    margin: 0.2in !important;
+  }
+
+  /* Hide everything except resume */
+  body.printing * {
+    visibility: hidden !important;
+  }
+
+  body.printing .resume-preview-content,
+  body.printing .resume-preview-content * {
+    visibility: visible !important;
   }
   
+  /* Clean base styles */
   html, body {
     margin: 0 !important;
     padding: 0 !important;
+    font-family: 'Times New Roman', Times, serif !important;
+    background: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    font-family: 'Times New Roman', Times, serif;
+  }
+  
+  /* NUCLEAR SINGLE PAGE ENFORCEMENT */
+  body.printing .resume-preview-content {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: scale(0.55) !important;
+    transform-origin: top left !important;
+    width: 182% !important;
+    max-height: 100vh !important;
+    padding: 2pt !important;
+    margin: 0 !important;
+    font-size: 6pt !important;
+    line-height: 0.8 !important;
     background: white !important;
+    overflow: hidden !important;
+    
+    /* ABSOLUTE PAGE BREAK PREVENTION */
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
   }
   
-  /* Hide any browser UI elements */
-  .no-print, .print\:hidden {
-    display: none !important;
-  }
-  
-  /* Ensure clean page layout */
-  * {
-    box-sizing: border-box;
-  }
-  
-  /* Remove any unwanted spacing at top/bottom of page */
-  body > *:first-child {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-  }
-  
-  body > *:last-child {
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
-  }
-  
-  /* Hide everything except the resume preview when printing */
-  .print\:hidden {
-    display: none !important;
-  }
-  
-  /* Ensure proper page breaks */
-  .print\:break-inside-avoid {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  
-  /* Remove shadows and borders for print */
-  .print\:shadow-none {
-    box-shadow: none !important;
-  }
-  
-  .print\:rounded-none {
-    border-radius: 0 !important;
-  }
-  
-  /* Professional typography for print */
-  .print\:text-xs {
-    font-size: 10pt !important;
-    line-height: 1.3 !important;
-  }
-  
-  .print\:text-sm {
-    font-size: 11pt !important;
-    line-height: 1.4 !important;
-  }
-  
-  .print\:text-base {
+  /* MICRO TYPOGRAPHY */
+  body.printing .resume-preview-content h1 {
     font-size: 12pt !important;
-    line-height: 1.4 !important;
+    margin: 0 0 1pt 0 !important;
+    line-height: 0.9 !important;
   }
   
-  .print\:text-2xl {
-    font-size: 16pt !important;
-    line-height: 1.2 !important;
+  body.printing .resume-preview-content h2 {
+    font-size: 8pt !important;
+    margin: 2pt 0 1pt 0 !important;
+    line-height: 0.9 !important;
   }
   
-  .print\:text-3xl {
-    font-size: 18pt !important;
-    line-height: 1.2 !important;
+  body.printing .resume-preview-content h3 {
+    font-size: 7pt !important;
+    margin: 1pt 0 0pt 0 !important;
+    line-height: 0.9 !important;
+  }
+  
+  body.printing .resume-preview-content p,
+  body.printing .resume-preview-content div,
+  body.printing .resume-preview-content span {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0.8 !important;
+  }
+  
+  body.printing .resume-preview-content ul {
+    margin: 0pt !important;
+    padding-left: 6pt !important;
+  }
+  
+  body.printing .resume-preview-content li {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0.8 !important;
+  }
+  
+  /* ELIMINATE ALL SPACING */
+  body.printing .resume-preview-content > div {
+    margin-bottom: 1pt !important;
+  }
+  
+  body.printing .resume-preview-content .space-y-5 > * + *,
+  body.printing .resume-preview-content .space-y-4 > * + *,
+  body.printing .resume-preview-content .space-y-3 > * + *,
+  body.printing .resume-preview-content .space-y-2 > * + *,
+  body.printing .resume-preview-content .space-y-1 > * + * {
+    margin-top: 1pt !important;
+  }
+  
+  /* FORCE EVERYTHING TO AVOID PAGE BREAKS */
+  body.printing .resume-preview-content,
+  body.printing .resume-preview-content *,
+  body.printing .resume-preview-content > *,
+  body.printing .resume-preview-content div,
+  body.printing .resume-preview-content section,
+  body.printing .resume-preview-content p,
+  body.printing .resume-preview-content ul,
+  body.printing .resume-preview-content li,
+  body.printing .resume-preview-content h1,
+  body.printing .resume-preview-content h2,
+  body.printing .resume-preview-content h3 {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    orphans: 999 !important;
+    widows: 999 !important;
   }
   
   /* Professional spacing for print */
@@ -217,7 +249,7 @@
   }
   
   .print\:p-6 {
-    padding: 12pt !important;
+    padding: 8pt !important;
   }
   
   .print\:m-0 {
@@ -331,46 +363,4 @@
   }
 }
 
-/* Additional print styles to hide browser headers/footers */
-@media print {
-  /* Force clean page margins and remove browser headers/footers */
-  html {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  /* Hide page info that browsers add */
-  @page {
-    margin: 0.5in 0.75in;
-    size: A4;
-    
-    /* Attempt to hide headers and footers on various browsers */
-    @top-left-corner { content: ""; }
-    @top-left { content: ""; }
-    @top-center { content: ""; }
-    @top-right { content: ""; }
-    @top-right-corner { content: ""; }
-    
-    @bottom-left-corner { content: ""; }
-    @bottom-left { content: ""; }
-    @bottom-center { content: ""; }
-    @bottom-right { content: ""; }
-    @bottom-right-corner { content: ""; }
-  }
-  
-  /* Show resume content properly */
-  .resume-preview-content {
-    display: block !important;
-    visibility: visible !important;
-    background: white !important;
-  }
-  
-  .resume-preview-content * {
-    visibility: visible !important;
-  }
-}
+/* Removed conflicting print styles - using unified approach above */
