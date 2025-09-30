@@ -341,65 +341,68 @@ function ResumeBuilder() {
                 <button
                   onClick={() => {
                     // Add printing class to body for enhanced print styles
-                    document.body.classList.add('printing');
-                    
+                    document.body.classList.add("printing");
+
                     // Force single page layout
-                    const resumeContent = document.querySelector('.resume-preview-content') as HTMLElement;
-                    let originalTransform = '';
-                    let originalWidth = '';
-                    let originalHeight = '';
-                    
+                    const resumeContent = document.querySelector(
+                      ".resume-preview-content"
+                    ) as HTMLElement;
+                    let originalTransform = "";
+                    let originalWidth = "";
+                    let originalHeight = "";
+
                     if (resumeContent) {
                       // Store original styles
                       originalTransform = resumeContent.style.transform;
                       originalWidth = resumeContent.style.width;
                       originalHeight = resumeContent.style.height;
-                      
-                      // Apply NUCLEAR single-page styling 
-                      resumeContent.style.transform = 'scale(0.55)';
-                      resumeContent.style.transformOrigin = 'top left';
-                      resumeContent.style.width = '182%';
-                      resumeContent.style.maxHeight = '100vh';
-                      resumeContent.style.overflow = 'hidden';
-                      resumeContent.style.fontSize = '6pt';
-                      resumeContent.style.lineHeight = '0.85';
-                      
+
+                      // Apply NUCLEAR single-page styling
+                      resumeContent.style.transform = "scale(0.55)";
+                      resumeContent.style.transformOrigin = "top left";
+                      resumeContent.style.width = "182%";
+                      resumeContent.style.maxHeight = "100vh";
+                      resumeContent.style.overflow = "hidden";
+                      resumeContent.style.fontSize = "6pt";
+                      resumeContent.style.lineHeight = "0.85";
+
                       // Force all elements to avoid page breaks
-                      const allElements = resumeContent.querySelectorAll('*');
-                      allElements.forEach(el => {
+                      const allElements = resumeContent.querySelectorAll("*");
+                      allElements.forEach((el) => {
                         const element = el as HTMLElement;
-                        element.style.pageBreakInside = 'avoid';
-                        element.style.breakInside = 'avoid';
-                        element.style.pageBreakBefore = 'avoid';
-                        element.style.pageBreakAfter = 'avoid';
+                        element.style.pageBreakInside = "avoid";
+                        element.style.breakInside = "avoid";
+                        element.style.pageBreakBefore = "avoid";
+                        element.style.pageBreakAfter = "avoid";
                       });
                     }
-                    
+
                     // Wait for styles to apply then print
                     setTimeout(() => {
                       window.print();
-                      
+
                       // Clean up after print dialog
                       setTimeout(() => {
-                        document.body.classList.remove('printing');
-                        
+                        document.body.classList.remove("printing");
+
                         // Restore original styles
                         if (resumeContent) {
                           resumeContent.style.transform = originalTransform;
                           resumeContent.style.width = originalWidth;
                           resumeContent.style.height = originalHeight;
-                          resumeContent.style.maxHeight = '';
-                          resumeContent.style.overflow = '';
-                          resumeContent.style.fontSize = '';
-                          resumeContent.style.lineHeight = '';
-                          
-                          const allElements = resumeContent.querySelectorAll('*');
-                          allElements.forEach(el => {
+                          resumeContent.style.maxHeight = "";
+                          resumeContent.style.overflow = "";
+                          resumeContent.style.fontSize = "";
+                          resumeContent.style.lineHeight = "";
+
+                          const allElements =
+                            resumeContent.querySelectorAll("*");
+                          allElements.forEach((el) => {
                             const element = el as HTMLElement;
-                            element.style.pageBreakInside = '';
-                            element.style.breakInside = '';
-                            element.style.pageBreakBefore = '';
-                            element.style.pageBreakAfter = '';
+                            element.style.pageBreakInside = "";
+                            element.style.breakInside = "";
+                            element.style.pageBreakBefore = "";
+                            element.style.pageBreakAfter = "";
                           });
                         }
                       }, 1000);
